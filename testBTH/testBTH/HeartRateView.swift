@@ -15,17 +15,16 @@ struct HeartRateView: View {
     @Binding var result: HeartRateMeasurementCharacteristic.Result
     @Binding var bodySensorLocation: BodySensorLocation
     
-    private var hr_bpm_str: String {
-        connectionState.ready ? String(result.bpm) : "N/A"
-    }
-    
     var body: some View {
         List {
+            // Heart Rate BPM
             HStack{
                 Image(systemName: "heart.fill")
                     .foregroundColor(.red)
-                Text("\(hr_bpm_str)")
+                Text("\(connectionState.ready ? String(result.bpm) : "N/A")")
             }
+            
+            // RRInterval(s) in millieseconds
             HStack {
                 if result.rrInterval == .oneOrMorePresent  {
                     Image(systemName: "waveform.path.ecg")
@@ -38,11 +37,13 @@ struct HeartRateView: View {
                 }
             }
             
+            // Sensor whether contacted or not, and sensor supported body location
             HStack {
                 Image(systemName: result.sensorContactStatus == .supportedAndContacted ? "eye" : "eye.slash")
                 Text("Sensor: \(result.sensorContactStatus.description) \(bodySensorLocation == .none ? "" : "at \(bodySensorLocation.rawValue)")")
             }
             
+            // Device connection status
             HStack{
                 Image(systemName: connectionState == .connected ? "hand.thumbsup" : "ear")
                 Text("Device: \(connectionState.rawValue) ")
