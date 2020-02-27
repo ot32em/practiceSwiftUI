@@ -15,8 +15,9 @@
 		2A73C3212404D5D7005F9660 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2A73C31F2404D5D7005F9660 /* LaunchScreen.storyboard */; };
 		2A73C32C2404D5D7005F9660 /* testBTHTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A73C32B2404D5D7005F9660 /* testBTHTests.swift */; };
 		2A73C3382404E363005F9660 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A73C3372404E363005F9660 /* CoreBluetooth.framework */; };
-		2A73C33A2404E47C005F9660 /* BTHRDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A73C3392404E47C005F9660 /* BTHRDetector.swift */; };
+		2A73C33A2404E47C005F9660 /* HeartRateDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A73C3392404E47C005F9660 /* HeartRateDetector.swift */; };
 		2AC1602524063A6A00F08A61 /* Characteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC1602424063A6A00F08A61 /* Characteristic.swift */; };
+		2AC1602B24076B4400F08A61 /* HeartRateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC1602A24076B4400F08A61 /* HeartRateView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,9 +43,10 @@
 		2A73C32B2404D5D7005F9660 /* testBTHTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testBTHTests.swift; sourceTree = "<group>"; };
 		2A73C32D2404D5D7005F9660 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A73C3372404E363005F9660 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
-		2A73C3392404E47C005F9660 /* BTHRDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BTHRDetector.swift; sourceTree = "<group>"; };
+		2A73C3392404E47C005F9660 /* HeartRateDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateDetector.swift; sourceTree = "<group>"; };
 		2AC1601F240601CD00F08A61 /* testBTH.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = testBTH.entitlements; sourceTree = "<group>"; };
 		2AC1602424063A6A00F08A61 /* Characteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Characteristic.swift; sourceTree = "<group>"; };
+		2AC1602A24076B4400F08A61 /* HeartRateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,7 +94,8 @@
 				2A73C3142404D5D3005F9660 /* AppDelegate.swift */,
 				2A73C3162404D5D3005F9660 /* SceneDelegate.swift */,
 				2A73C3182404D5D3005F9660 /* ContentView.swift */,
-				2A73C3392404E47C005F9660 /* BTHRDetector.swift */,
+				2AC1602A24076B4400F08A61 /* HeartRateView.swift */,
+				2A73C3392404E47C005F9660 /* HeartRateDetector.swift */,
 				2AC1602424063A6A00F08A61 /* Characteristic.swift */,
 				2A73C31A2404D5D7005F9660 /* Assets.xcassets */,
 				2A73C31F2404D5D7005F9660 /* LaunchScreen.storyboard */,
@@ -228,11 +231,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2A73C33A2404E47C005F9660 /* BTHRDetector.swift in Sources */,
+				2A73C33A2404E47C005F9660 /* HeartRateDetector.swift in Sources */,
 				2A73C3152404D5D3005F9660 /* AppDelegate.swift in Sources */,
 				2AC1602524063A6A00F08A61 /* Characteristic.swift in Sources */,
 				2A73C3172404D5D3005F9660 /* SceneDelegate.swift in Sources */,
 				2A73C3192404D5D3005F9660 /* ContentView.swift in Sources */,
+				2AC1602B24076B4400F08A61 /* HeartRateView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

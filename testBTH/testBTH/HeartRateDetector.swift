@@ -24,22 +24,37 @@ enum ConnectionState : String {
     }
 }
 
-class BTHRDetector: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+class HeartRateDetector: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     @Published var connectionState = ConnectionState.disconnected
-    @Published var bodySensorLocation = Characteristic.HeartRateBodySensorLocation.BodySensorLocation.none
-    @Published var heartRateResult = Characteristic.HeartRateMeasurement.Result()
+    @Published var result = HeartRateMeasurementCharacteristic.Result()
+    @Published var bodySensorLocation = BodySensorLocation.none
     
     var centralManager: CBCentralManager? = nil
+    func createCBCentralManager() -> CBCentralManager {
+        let queue = DispatchQueue(label: "idv.otchen.testBTH.centralManager", qos: .default, attributes: .concurrent)
+        return CBCentralManager(delegate: self, queue: queue)
+    }
+    
     var peripheral: CBPeripheral? = nil
     
     func start() {
-        let queue = DispatchQueue(label: "idv.otchen.testBTH.centralManager", qos: .default, attributes: .concurrent)
-        centralManager = CBCentralManager(delegate: self, queue: queue)
+        stop()
+        centralManager = createCBCentralManager()
+    }
+    
+    func stop() {
+        self.centralManager?.delegate = nil
+        self.centralManager?.stopScan()
+        if self.peripheral != nil {
+            self.peripheral!.delegate = nil
+            self.centralManager?.cancelPeripheralConnection(self.peripheral!)
+            self.peripheral = nil
+        }
+        self.centralManager = nil
     }
   
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        print(#function)
-        print("isScanning: \(central.isScanning)")
+        print(#function, "isScanning: \(central.isScanning)")
         switch central.state {
         case .unknown:
             print("unknown")
@@ -53,7 +68,7 @@ class BTHRDetector: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeri
             print("poweredOff")
         case .poweredOn:
             print("poweredOn")
-            central.scanForPeripherals(withServices: [Service.HeartRate.uuid], options: nil)
+            central.scanForPeripherals(withServices: [HeartRateService.uuid()], options: nil)
             DispatchQueue.main.async {
                 self.connectionState = .scanning
             }
@@ -80,11 +95,11 @@ class BTHRDetector: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeri
         print(#function)
         DispatchQueue.main.async {
             self.connectionState = .disconnected
-            self.heartRateResult = Characteristic.HeartRateMeasurement.Result()
+            self.result = HeartRateMeasurementCharacteristic.Result()
             self.bodySensorLocation = .none
         }
         
-        central.scanForPeripherals(withServices: [Service.HeartRate.uuid], options: nil)
+        central.scanForPeripherals(withServices: [HeartRateService.uuid()], options: nil)
         DispatchQueue.main.async {
             self.connectionState = .scanning
         }
@@ -92,7 +107,7 @@ class BTHRDetector: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeri
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral){
         print(#function)
-        peripheral.discoverServices([Service.HeartRate.uuid])
+        peripheral.discoverServices([HeartRateService.uuid()])
         DispatchQueue.main.async {
             self.connectionState = .connecting
         }
@@ -104,7 +119,7 @@ class BTHRDetector: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeri
             centralManager?.cancelPeripheralConnection(peripheral)
             return
         }
-        guard let service = peripheral.services?.filter({$0.uuid == Service.HeartRate.uuid}).first else {
+        guard let service = peripheral.services?.filter({$0.uuid == HeartRateService.uuid()}).first else {
             centralManager?.cancelPeripheralConnection(peripheral)
             return
         }
@@ -128,10 +143,10 @@ class BTHRDetector: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeri
         }
         
         for characteristic in characteristics {
-            if characteristic.uuid == Characteristic.HeartRateMeasurement.uuid {
+            if characteristic.uuid == HeartRateMeasurementCharacteristic.uuid() {
                 peripheral.setNotifyValue(true, for: characteristic)
             }
-            else if characteristic.uuid == Characteristic.HeartRateBodySensorLocation.uuid {
+            else if characteristic.uuid == HeartRateBodySensorLocationCharacteristic.uuid() {
                 peripheral.readValue(for: characteristic)
             }
         }
@@ -148,14 +163,14 @@ class BTHRDetector: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeri
         }
         let bytes = [UInt8](value)
         
-        if characteristic.uuid == Characteristic.HeartRateMeasurement.uuid {
-            let result = Characteristic.HeartRateMeasurement.read(bytes: bytes)
+        if characteristic.uuid == HeartRateMeasurementCharacteristic.uuid() {
+            let result = HeartRateMeasurementCharacteristic.read(bytes: bytes)
             DispatchQueue.main.async {
-                self.heartRateResult = result
+                self.result = result
             }
         }
-        else if characteristic.uuid == Characteristic.HeartRateBodySensorLocation.uuid {
-            let result = Characteristic.HeartRateBodySensorLocation.read(bytes: bytes)
+        else if characteristic.uuid == HeartRateBodySensorLocationCharacteristic.uuid() {
+            let result = HeartRateBodySensorLocationCharacteristic.read(bytes: bytes)
             DispatchQueue.main.async {
                 self.bodySensorLocation = result
             }
@@ -168,7 +183,7 @@ class BTHRDetector: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeri
 
     func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?){
         var name = ""
-        if characteristic.uuid == Characteristic.HeartRateMeasurement.uuid {
+        if characteristic.uuid == HeartRateMeasurementCharacteristic.uuid() {
             name = "heart rate mesurement"
         }
         else {
@@ -180,7 +195,7 @@ class BTHRDetector: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeri
 
 
 // optional functions
-extension BTHRDetector {
+extension HeartRateDetector {
     func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]){
         print(#function)
     }
@@ -227,15 +242,15 @@ extension BTHRDetector {
 func dumpPeripheral(peripheral: CBPeripheral) {
     if let services = peripheral.services {
         for service in services {
-            guard service.uuid == Service.HeartRate.uuid else { continue }
+            guard service.uuid == HeartRateService.uuid() else { continue }
             print("found heart_rate_service")
 
             if let characteristics = service.characteristics {
                 for characteristic in characteristics {
-                    if characteristic.uuid == Characteristic.HeartRateBodySensorLocation.uuid {
+                    if characteristic.uuid == HeartRateBodySensorLocationCharacteristic.uuid() {
                         print("found characteristic body sensor location")
                     }
-                    else if characteristic.uuid == Characteristic.HeartRateMeasurement.uuid {
+                    else if characteristic.uuid == HeartRateMeasurementCharacteristic.uuid() {
                         print("found characteristic measurement")
                     }
                     else {
