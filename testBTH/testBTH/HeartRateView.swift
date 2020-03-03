@@ -25,7 +25,14 @@ struct HeartRateView: View {
                 HStack{
                     Image(systemName: "heart.fill")
                         .foregroundColor(.red)
-                    Text("\(connectionState.ready ? String(result.bpm) : "N/A")")
+                        .frame(width: 40)
+                        .font(.system(size: 40))
+                    HStack(alignment: .center) {
+                        Spacer()
+                        Text("\(connectionState.ready ? String(result.bpm) : "N/A")")
+                            .font(.system(size: 150))
+                        Spacer()
+                    }
                 }
                 
                 // RRInterval(s) in millieseconds
@@ -33,10 +40,12 @@ struct HeartRateView: View {
                     if result.rrInterval == .oneOrMorePresent  {
                         Image(systemName: "waveform.path.ecg")
                             .foregroundColor(.red)
+                            .frame(width: 40)
                         Text("RRInterval: \(result.rrIntervalValues.map({"\($0*1000/1024)ms "}).joined(separator: ","))")
                     }
                     else {
                         Image(systemName: "waveform.path.ecg")
+                            .frame(width: 40)
                         Text("RRInterval: N/A")
                     }
                 }
@@ -44,12 +53,14 @@ struct HeartRateView: View {
                 // Sensor whether contacted or not, and sensor supported body location
                 HStack {
                     Image(systemName: result.sensorContactStatus == .supportedAndContacted ? "eye" : "eye.slash")
+                        .frame(width: 40)
                     Text("Sensor: \(result.sensorContactStatus.description) \(bodySensorLocation == .none ? "" : "at \(bodySensorLocation.rawValue)")")
                 }
                 
                 // Device connection status
                 HStack{
                     Image(systemName: connectionState == .connected ? "hand.thumbsup" : "ear")
+                        .frame(width: 40)
                     Text("Device: \(connectionState.rawValue) ")
                 }
             }
@@ -59,3 +70,4 @@ struct HeartRateView: View {
     }
     
 }
+
