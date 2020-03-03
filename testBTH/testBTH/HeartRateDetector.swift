@@ -9,8 +9,6 @@
 import Foundation
 
 import CoreBluetooth
-import HealthKit
-
 
 enum ConnectionState : String {
     case disconnected
@@ -29,12 +27,7 @@ class HeartRateDetector: NSObject, ObservableObject, CBCentralManagerDelegate, C
     @Published var connectionState = ConnectionState.disconnected
     @Published var result = HeartRateMeasurementCharacteristic.Result()
     @Published var bodySensorLocation = BodySensorLocation.none
-    
-    
-    let hkStore = HKStore()
-    func readBpm( completeHandler: @escaping  ([HKSample]?) -> Void ) {
-        hkStore.query(completeHandler: completeHandler)
-    }
+
     
     var centralManager: CBCentralManager? = nil
     func createCBCentralManager() -> CBCentralManager {
@@ -173,7 +166,7 @@ class HeartRateDetector: NSObject, ObservableObject, CBCentralManagerDelegate, C
         if characteristic.uuid == HeartRateMeasurementCharacteristic.uuid() {
             let result = HeartRateMeasurementCharacteristic.read(bytes: bytes)
             DispatchQueue.main.async {
-                self.hkStore.update(Double(result.bpm))
+                
                 self.result = result
             }
         }

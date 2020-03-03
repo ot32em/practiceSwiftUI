@@ -8,10 +8,13 @@
 
 import SwiftUI
 
+import Combine
 import HealthKit
 
 struct ContentView: View {
+    let hkStore = HKStore()
     @ObservedObject var detector = HeartRateDetector()
+    var cancellable: Cancellable? = nil
     
     var body: some View {
         HeartRateView(connectionState: $detector.connectionState,
@@ -19,20 +22,11 @@ struct ContentView: View {
                       bodySensorLocation: $detector.bodySensorLocation)
         .onAppear{
             self.detector.start()
-            self.detector.readBpm { (samples: [HKSample]?) in
-                guard let samples = samples else { return }
-                
-                for sample in samples {
-                    guard let qSample = sample as? HKQuantitySample else {
-                        print("usual")
-                        continue
-                    }
-                    let q = qSample.quantity
-                    let unit = HKUnit.count().unitDivided(by: .minute())
-                    print(q.doubleValue(for: unit))
-                }
-                
-            }
+            self.detector.$result
+                .receive(on: RunLoop.main)
+                .sink(receiveValue: { (result: HeartRateMeasurementCharacteristic.Result) in
+                    self.hkStore.update(Double(result.bpm))
+                })
         }
         
     }
