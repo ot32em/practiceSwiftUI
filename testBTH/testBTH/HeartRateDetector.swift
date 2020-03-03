@@ -9,6 +9,7 @@
 import Foundation
 
 import CoreBluetooth
+import HealthKit
 
 
 enum ConnectionState : String {
@@ -28,6 +29,12 @@ class HeartRateDetector: NSObject, ObservableObject, CBCentralManagerDelegate, C
     @Published var connectionState = ConnectionState.disconnected
     @Published var result = HeartRateMeasurementCharacteristic.Result()
     @Published var bodySensorLocation = BodySensorLocation.none
+    
+    
+    let hkStore = HKStore()
+    func readBpm( completeHandler: @escaping  ([HKSample]?) -> Void ) {
+        hkStore.query(completeHandler: completeHandler)
+    }
     
     var centralManager: CBCentralManager? = nil
     func createCBCentralManager() -> CBCentralManager {
@@ -166,6 +173,7 @@ class HeartRateDetector: NSObject, ObservableObject, CBCentralManagerDelegate, C
         if characteristic.uuid == HeartRateMeasurementCharacteristic.uuid() {
             let result = HeartRateMeasurementCharacteristic.read(bytes: bytes)
             DispatchQueue.main.async {
+                self.hkStore.update(Double(result.bpm))
                 self.result = result
             }
         }
@@ -193,51 +201,51 @@ class HeartRateDetector: NSObject, ObservableObject, CBCentralManagerDelegate, C
     }
 }
 
-
-// optional functions
-extension HeartRateDetector {
-    func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]){
-        print(#function)
-    }
-    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?){
-        print(#function)
-    }
-    func centralManager(_ central: CBCentralManager, connectionEventDidOccur event: CBConnectionEvent, for peripheral: CBPeripheral){ print(#function)
-    }
-    func centralManager(_ central: CBCentralManager, didUpdateANCSAuthorizationFor peripheral: CBPeripheral){
-        print(#function)
-    }
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverIncludedServicesFor service: CBService, error: Error?){
-        print(#function)
-    }
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?){
-        print(#function)
-    }
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor descriptor: CBDescriptor, error: Error?){
-        print(#function)
-    }
-    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor descriptor: CBDescriptor, error: Error?){
-        print(#function)
-    }
-    func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral){
-        print(#function)
-    }
-    func peripheral(_ peripheral: CBPeripheral, didOpen channel: CBL2CAPChannel?, error: Error?){
-        print(#function)
-    }
-    func peripheralDidUpdateName(_ peripheral: CBPeripheral){
-        print(#function)
-    }
-    func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]){
-        print(#function)
-    }
-    func peripheralDidUpdateRSSI(_ peripheral: CBPeripheral, error: Error?){
-        print(#function)
-    }
-    func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?){
-        print(#function)
-    }
-}
+//
+//// optional functions
+//extension HeartRateDetector {
+//    func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]){
+//        print(#function)
+//    }
+//    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?){
+//        print(#function)
+//    }
+//    func centralManager(_ central: CBCentralManager, connectionEventDidOccur event: CBConnectionEvent, for peripheral: CBPeripheral){ print(#function)
+//    }
+//    func centralManager(_ central: CBCentralManager, didUpdateANCSAuthorizationFor peripheral: CBPeripheral){
+//        print(#function)
+//    }
+//    func peripheral(_ peripheral: CBPeripheral, didDiscoverIncludedServicesFor service: CBService, error: Error?){
+//        print(#function)
+//    }
+//    func peripheral(_ peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?){
+//        print(#function)
+//    }
+//    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor descriptor: CBDescriptor, error: Error?){
+//        print(#function)
+//    }
+//    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor descriptor: CBDescriptor, error: Error?){
+//        print(#function)
+//    }
+//    func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral){
+//        print(#function)
+//    }
+//    func peripheral(_ peripheral: CBPeripheral, didOpen channel: CBL2CAPChannel?, error: Error?){
+//        print(#function)
+//    }
+//    func peripheralDidUpdateName(_ peripheral: CBPeripheral){
+//        print(#function)
+//    }
+//    func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]){
+//        print(#function)
+//    }
+//    func peripheralDidUpdateRSSI(_ peripheral: CBPeripheral, error: Error?){
+//        print(#function)
+//    }
+//    func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?){
+//        print(#function)
+//    }
+//}
 
 func dumpPeripheral(peripheral: CBPeripheral) {
     if let services = peripheral.services {

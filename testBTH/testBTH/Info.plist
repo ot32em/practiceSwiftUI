@@ -2,10 +2,16 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Can I Use Your HelthKit Data?</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Hello Can I Use Your BTH?</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>AccessibilityEnabled</key>
+	<false/>
+	<key>ApplicationAccessibilityEnabled</key>
+	<false/>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -51,6 +57,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
+	<string>Can I Write Your HealthKit Data?</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Can I Read Your HealthKit Data?</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
