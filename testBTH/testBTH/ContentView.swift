@@ -12,21 +12,45 @@ import Combine
 import HealthKit
 
 struct ContentView: View {
-    let hkStore = HKStore()
-    @EnvironmentObject var detector: HeartRateDetector
-    var cancellable: Cancellable? = nil
-    
     var body: some View {
-        HeartRateView()
-        .onAppear{
-            self.detector.start()
-            self.detector.$result
-                .receive(on: RunLoop.main)
-                .sink(receiveValue: { (result: HeartRateMeasurementCharacteristic.Result) in
-                    self.hkStore.update(Double(result.bpm))
-                })
+        NavigationView {
+            List {
+                NavigationLink("Dashboard", destination: DashboardView())
+                NavigationLink("Start a workout", destination: StartView())
+                NavigationLink("Activities", destination: ActivitiesView())
+                NavigationLink("Settings", destination: SettingsView())
+            }
+                .foregroundColor(.primary)
+                .background(Color.accentColor)
+                .navigationBarTitle("Main")
         }
-        
+    }
+}
+
+struct DashboardView : View {
+    var body: some View {
+        Text("DashboardView")
+            .navigationBarTitle("DashboardView")
+    }
+}
+
+struct StartView : View {
+    var body: some View {
+        Text("StartView")
+            .navigationBarTitle("StartView")
+    }
+}
+
+struct ActivitiesView : View {
+    var body: some View {
+        Text("ActivitiesView")
+            .navigationBarTitle("ActivitiesView")
+    }
+}
+struct SettingsView : View {
+    var body: some View {
+        Text("SettingsView")
+            .navigationBarTitle("SettingsView")
     }
 }
 

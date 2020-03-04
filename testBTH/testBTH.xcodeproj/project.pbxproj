@@ -20,6 +20,7 @@
 		2AC1602B24076B4400F08A61 /* HeartRateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC1602A24076B4400F08A61 /* HeartRateView.swift */; };
 		2AC16043240CE29B00F08A61 /* HKStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC16042240CE29B00F08A61 /* HKStore.swift */; };
 		2AC16045240CE49800F08A61 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AC16044240CE49800F08A61 /* HealthKit.framework */; };
+		2AC16087240F3EBD00F08A61 /* RunningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC16086240F3EBD00F08A61 /* RunningView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 		2AC16034240791E400F08A61 /* testBTHDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = testBTHDebug.entitlements; sourceTree = "<group>"; };
 		2AC16042240CE29B00F08A61 /* HKStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HKStore.swift; sourceTree = "<group>"; };
 		2AC16044240CE49800F08A61 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		2AC16086240F3EBD00F08A61 /* RunningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +107,7 @@
 				2A73C3392404E47C005F9660 /* HeartRateDetector.swift */,
 				2AC1602424063A6A00F08A61 /* Characteristic.swift */,
 				2AC16042240CE29B00F08A61 /* HKStore.swift */,
+				2AC16086240F3EBD00F08A61 /* RunningView.swift */,
 				2A73C31A2404D5D7005F9660 /* Assets.xcassets */,
 				2A73C31F2404D5D7005F9660 /* LaunchScreen.storyboard */,
 				2A73C3222404D5D7005F9660 /* Info.plist */,
@@ -240,6 +243,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2AC16087240F3EBD00F08A61 /* RunningView.swift in Sources */,
 				2AC16043240CE29B00F08A61 /* HKStore.swift in Sources */,
 				2A73C33A2404E47C005F9660 /* HeartRateDetector.swift in Sources */,
 				2A73C3152404D5D3005F9660 /* AppDelegate.swift in Sources */,
