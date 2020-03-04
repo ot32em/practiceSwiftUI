@@ -13,13 +13,11 @@ import HealthKit
 
 struct ContentView: View {
     let hkStore = HKStore()
-    @ObservedObject var detector = HeartRateDetector()
+    @EnvironmentObject var detector: HeartRateDetector
     var cancellable: Cancellable? = nil
     
     var body: some View {
-        HeartRateView(connectionState: $detector.connectionState,
-                      result: $detector.result,
-                      bodySensorLocation: $detector.bodySensorLocation)
+        HeartRateView()
         .onAppear{
             self.detector.start()
             self.detector.$result

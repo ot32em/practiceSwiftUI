@@ -11,9 +11,16 @@ import SwiftUI
 
 
 struct HeartRateView: View {
-    @Binding var connectionState: ConnectionState
-    @Binding var result: HeartRateMeasurementCharacteristic.Result
-    @Binding var bodySensorLocation: BodySensorLocation
+    @EnvironmentObject var detector: HeartRateDetector
+    var connectionState: ConnectionState { detector.connectionState }
+    var result: HeartRateMeasurementCharacteristic.Result { detector.result }
+        var bpm: Int { return result.bpm }
+        var sensorContactStatus: SensorContactStatus { result.sensorContactStatus }
+        var energyExpendedStatus: EnergyExpendedStatus { result.energyExpendedStatus }
+        var energyExpendedValue: Int { result.energyExpendedValue }
+        var rrInterval: RRInterval { result.rrInterval }
+        var rrIntervalValues: [Int] { result.rrIntervalValues }
+    var bodySensorLocation: BodySensorLocation { detector.bodySensorLocation }
     
     @State var isActive: Bool = true
     
@@ -29,7 +36,7 @@ struct HeartRateView: View {
                         .font(.system(size: 40))
                     HStack(alignment: .center) {
                         Spacer()
-                        Text("\(connectionState.ready ? String(result.bpm) : "N/A")")
+                        Text("\(connectionState.ready ? String(bpm) : "N/A")")
                             .font(.system(size: 150))
                         Spacer()
                     }
@@ -37,11 +44,11 @@ struct HeartRateView: View {
                 
                 // RRInterval(s) in millieseconds
                 HStack {
-                    if result.rrInterval == .oneOrMorePresent  {
+                    if rrInterval == .oneOrMorePresent  {
                         Image(systemName: "waveform.path.ecg")
                             .foregroundColor(.red)
                             .frame(width: 40)
-                        Text("RRInterval: \(result.rrIntervalValues.map({"\($0*1000/1024)ms "}).joined(separator: ","))")
+                        Text("RRInterval: \(rrIntervalValues.map({"\($0*1000/1024)ms "}).joined(separator: ","))")
                     }
                     else {
                         Image(systemName: "waveform.path.ecg")
@@ -52,9 +59,9 @@ struct HeartRateView: View {
                 
                 // Sensor whether contacted or not, and sensor supported body location
                 HStack {
-                    Image(systemName: result.sensorContactStatus == .supportedAndContacted ? "eye" : "eye.slash")
+                    Image(systemName: sensorContactStatus == .supportedAndContacted ? "eye" : "eye.slash")
                         .frame(width: 40)
-                    Text("Sensor: \(result.sensorContactStatus.description) \(bodySensorLocation == .none ? "" : "at \(bodySensorLocation.rawValue)")")
+                    Text("Sensor: \(sensorContactStatus.description) \(bodySensorLocation == .none ? "" : "at \(bodySensorLocation.rawValue)")")
                 }
                 
                 // Device connection status
