@@ -8,47 +8,170 @@
 
 import SwiftUI
 import CoreData
-
-
-struct Record : Identifiable {
-    var id: Date { return timestamp }
-    
-    var bpm: Int16 = 0
-    var timestamp: Date = Date()
-}
+import Combine
 
 
 struct ContentView: View {
-    fileprivate var playCoreData = PlayCoreData()
+    var recordDB = RecordDB()
+    
     @State private var records: [Record] = [
-        Record(bpm: 130, timestamp: Date() - 2),
-        Record(bpm: 150, timestamp: Date() - 1),
-        Record(bpm: 140, timestamp: Date())
+        Record(name: "Alice", dice: 5, time: Date() - 2),
+        Record(name: "Bob", dice: 2, time: Date() - 1),
+        Record(name: "Alice", dice: 4, time: Date())
     ]
+
+    @State var myCancellabel: AnyCancellable? = nil
     
     var body: some View {
         VStack {
-            ForEach(records){ record in
-                VStack{
-                    Text("\(record.bpm)")
-                        .font(.headline)
-                    Text("\(record.timestamp)")
-                        .font(.subheadline)
+            HStack{
+                Text("\(records.count) Records")
+            }
+            VStack {
+                HStack{
+                    Text("Name").font(.headline)
+                        .frame(width: 120)
+                    Text("Dice").font(.headline)
+                    Spacer()
+                    Text("Time").font(.subheadline)
+                        .frame(width: 100, alignment: .leading)
+                    Text("")
+                        .foregroundColor(.primary)
+                        .frame(width: 40, alignment: .leading)
+                }.padding(.horizontal, 10)
+                
+                Divider()
+                
+                ForEach(records){ record in
+                    HStack{
+                        Text("\(record.name)").font(.headline)
+                            .frame(width: 120, alignment: .leading)
+                        Text("\(record.dice)").font(.headline)
+                        Spacer()
+                        Text("\(record.timestampStr)")
+                            .font(.subheadline)
+                            .frame(width: 100, alignment: .leading)
+                        
+                        Button(action: {
+                            self.recordDB.update(id: record.uuid, newValues: ["dice": Int.random(in: 0..<6)])
+                            self.myCancellabel = self.recordDB.getRecords()
+                                .receive(on: RunLoop.main)
+                                .sink(receiveCompletion: { result in
+                                    if case .failure(let err) = result {
+                                        print("err: \(err)")
+                                    }
+                                },receiveValue: { (records: [Record]) in
+                                    self.records = records
+                                })
+                        }, label: {
+                            Image(systemName: "gamecontroller")
+                                .foregroundColor(.black)
+                                .frame(width: 20, alignment: .leading)
+                        })
+                        Button(action: {
+                            self.recordDB.delete(id: record.uuid)
+                            self.myCancellabel = self.recordDB.getRecords()
+                                .receive(on: RunLoop.main)
+                                .sink(receiveCompletion: { result in
+                                    if case .failure(let err) = result {
+                                        print("err: \(err)")
+                                    }
+                                },receiveValue: { (records: [Record]) in
+                                    self.records = records
+                                })
+                        }, label: {
+                            Image(systemName: "x.circle.fill")
+                                .foregroundColor(.red)
+                                .frame(width: 20, alignment: .leading)
+                        })
+
+                    }.padding(.horizontal, 10)
+                    Divider()
                 }
             }
-            Button(action: {
-                self.playCoreData.add()
-                self.records = self.playCoreData.query()
-            }, label: {
-                Text("Add")
-            })
+            Spacer()
+            HStack {
+                Group {
+                    Button(action: {
+                        _ = self.recordDB.add(record: Record(name: "Alice", dice: Int.random(in: 0..<6), time: Date()))
+                        self.myCancellabel = self.recordDB.getRecords()
+                            .receive(on: RunLoop.main)
+                            .sink(receiveCompletion: { result in
+                                if case .failure(let err) = result {
+                                    print("err: \(err)")
+                                }
+                            },receiveValue: { (records: [Record]) in
+                                self.records = records
+                            })
+                    }, label: {
+                        Text("Add as Alice")
+                            .padding(.init(top: 10, leading: 20, bottom: 10, trailing: 20))
+                    })
+                        .background(Color.green)
+                    
+                    Button(action: {
+                        _ = self.recordDB.add(record: Record(name: "Bob", dice: Int.random(in: 0..<6), time: Date()))
+                        self.myCancellabel = self.recordDB.getRecords()
+                            .receive(on: RunLoop.main)
+                            .sink(receiveCompletion: { result in
+                                if case .failure(let err) = result {
+                                    print("err: \(err)")
+                                }
+                            },receiveValue: { (records: [Record]) in
+                                self.records = records
+                            })
+                        
+                    }, label: {
+                        Text("Add as Bob")
+                            .padding(.init(top: 10, leading: 20, bottom: 10, trailing: 20))
+                    })
+                        .background(Color.yellow)
+                    
+                    Button(action: {
+                        self.myCancellabel = self.recordDB.getRecords()
+                            .receive(on: RunLoop.main)
+                            .sink(receiveCompletion: { result in
+                                if case .failure(let err) = result {
+                                    print("err: \(err)")
+                                }
+                            },receiveValue: { (records: [Record]) in
+                                self.records = records
+                            })
+                    }, label: {
+                        Text("Refresh")
+                            .padding(.init(top: 10, leading: 20, bottom: 10, trailing: 20))
+                    })
+                        .background(Color.blue)
+
+                    Button(action: {
+                        self.recordDB.deleteAll()
+                        self.myCancellabel = self.recordDB.getRecords()
+                            .receive(on: RunLoop.main)
+                            .sink(receiveCompletion: { result in
+                                if case .failure(let err) = result {
+                                    print("err: \(err)")
+                                }
+                            },receiveValue: { (records: [Record]) in
+                                self.records = records
+                            })
+                    }, label: {
+                        Text("Delete All")
+                            .padding(.init(top: 10, leading: 20, bottom: 10, trailing: 20))
+                    })
+                        .background(Color.red)
+                }
+                    .foregroundColor(.white)
+                    .cornerRadius(CGFloat(10.0))
+            }
+            .padding()
         }
         .onAppear{
-            _ = self.playCoreData
-            self.records = self.playCoreData.query()
+            // _ = self.playCoreData
+            // self.records = self.playCoreData.query()
         }
     }
 }
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
@@ -56,48 +179,3 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
-
-fileprivate class PlayCoreData {
-    var persistentContainer: NSPersistentContainer
-    init() {
-        persistentContainer = NSPersistentContainer(name: "testCoreData")
-        persistentContainer.loadPersistentStores { (desc: NSPersistentStoreDescription, error: Error?) in
-            if error != nil {
-                print("PlayCoreData init NG, error: \(String(describing: error))")
-            }
-            else {
-                print("PlayCoreData desc: \(desc)")
-            }
-        }
-    }
-    func query() -> [Record] {
-        let recordFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Record")
-        do {
-            guard let records = try self.persistentContainer.viewContext.fetch(recordFetch) as? [RecordMO] else {
-                fatalError()
-            }
-            return records.map{ (recordMO: RecordMO) in
-                Record(bpm: recordMO.bpm , timestamp: recordMO.timestamp ?? Date())
-            }
-        }
-        catch let e {
-            print("fetch error: \(e)")
-            return []
-        }
-        //self.persistentContainer.viewContext
-    }
-    func add() {
-        guard let record = NSEntityDescription.insertNewObject(forEntityName: "Record", into: self.persistentContainer.viewContext) as? RecordMO else {
-            fatalError()
-        }
-        
-        record.bpm = 130 + Int16.random(in: 0..<40)
-        record.timestamp = Date()
-        do {
-            try self.persistentContainer.viewContext.save()
-        }
-        catch let e {
-            print("save error: \(e)")
-        }
-    }
-}
