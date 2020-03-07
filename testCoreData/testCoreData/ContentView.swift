@@ -10,94 +10,76 @@ import SwiftUI
 import CoreData
 
 
-struct Record : Identifiable {
-    var id: Date { return timestamp }
-    
-    var bpm: Int16 = 0
-    var timestamp: Date = Date()
-}
-
-
 struct ContentView: View {
-    fileprivate var playCoreData = PlayCoreData()
-    @State private var records: [Record] = [
-        Record(bpm: 130, timestamp: Date() - 2),
-        Record(bpm: 150, timestamp: Date() - 1),
-        Record(bpm: 140, timestamp: Date())
-    ]
+    @FetchRequest(
+        entity: DiceRecordMO.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \DiceRecordMO.time, ascending: false)])
+    private var records: FetchedResults<DiceRecordMO>
+
+    @Environment(\.managedObjectContext)
+    private var cxt: NSManagedObjectContext
     
+    @State var player: Int = 0
+    let players = ["Alice", "Bob", "Charlie", "Daniel"]
+        
     var body: some View {
-        VStack {
-            ForEach(records){ record in
-                VStack{
-                    Text("\(record.bpm)")
-                        .font(.headline)
-                    Text("\(record.timestamp)")
-                        .font(.subheadline)
+        VStack{
+            HStack{
+                Picker("Player", selection: $player) {
+                    ForEach(players.indices, id: \.self) { i in
+                        Text(self.players[i]).tag(Int(i))
+                    }
+                }.pickerStyle(SegmentedPickerStyle())
+                Button("Roll", action: { self.addRecord() }).padding(.horizontal, 20)
+            }.padding()
+            
+            List(records, id: \.self){ record in
+                HStack{
+                    Text("\(record.displayName)")
+                    Text("\(record.dice)")
+                    Spacer()
+                    Text("\(record.displayTime)")
+                    Button("Update", action: { self.updateRecord(of: record.uuid)}).buttonStyle(BorderlessButtonStyle())
+                    Button("Delete", action: { self.deleteRecord(of: record.uuid)}).buttonStyle(BorderlessButtonStyle())
                 }
             }
-            Button(action: {
-                self.playCoreData.add()
-                self.records = self.playCoreData.query()
-            }, label: {
-                Text("Add")
-            })
+            Spacer()
+            Button("Delete All", action: { self.deleteAllRecords() }).padding()
         }
-        .onAppear{
-            _ = self.playCoreData
-            self.records = self.playCoreData.query()
-        }
+    }
+
+    func addRecord(){
+        let record = DiceRecordMO(context: cxt)
+        record.name = self.players[self.player]
+        record.dice = Int32.random(in: 0..<6)
+        record.time = Date()
+        record.uuid = UUID()
+        try! cxt.save()
+    }
+    func updateRecord(of uuid: UUID?) {
+        guard let uuid = uuid else { return }
+        records
+            .filter{$0.uuid != nil && $0.uuid! == uuid}
+            .forEach{ (record: DiceRecordMO) in
+                record.dice = Int32.random(in: 0..<6)
+                try! cxt.save()
+            }
+    }
+    func deleteRecord(of uuid: UUID?) {
+        guard let uuid = uuid else { return }
+        records
+            .filter{ $0.uuid != nil && $0.uuid == uuid }
+            .forEach{ cxt.delete($0)}
+    }
+    func deleteAllRecords(){
+        records
+            .forEach{ cxt.delete($0) }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
-    }
-}
-
-
-fileprivate class PlayCoreData {
-    var persistentContainer: NSPersistentContainer
-    init() {
-        persistentContainer = NSPersistentContainer(name: "testCoreData")
-        persistentContainer.loadPersistentStores { (desc: NSPersistentStoreDescription, error: Error?) in
-            if error != nil {
-                print("PlayCoreData init NG, error: \(String(describing: error))")
-            }
-            else {
-                print("PlayCoreData desc: \(desc)")
-            }
-        }
-    }
-    func query() -> [Record] {
-        let recordFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Record")
-        do {
-            guard let records = try self.persistentContainer.viewContext.fetch(recordFetch) as? [RecordMO] else {
-                fatalError()
-            }
-            return records.map{ (recordMO: RecordMO) in
-                Record(bpm: recordMO.bpm , timestamp: recordMO.timestamp ?? Date())
-            }
-        }
-        catch let e {
-            print("fetch error: \(e)")
-            return []
-        }
-        //self.persistentContainer.viewContext
-    }
-    func add() {
-        guard let record = NSEntityDescription.insertNewObject(forEntityName: "Record", into: self.persistentContainer.viewContext) as? RecordMO else {
-            fatalError()
-        }
-        
-        record.bpm = 130 + Int16.random(in: 0..<40)
-        record.timestamp = Date()
-        do {
-            try self.persistentContainer.viewContext.save()
-        }
-        catch let e {
-            print("save error: \(e)")
-        }
+        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        return ContentView().environment(\.managedObjectContext, context)
     }
 }
